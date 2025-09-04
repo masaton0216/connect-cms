@@ -13,9 +13,13 @@ return [
     */
 
 <<<<<<< HEAD
-    'cc_version' => '2.38.1',
+<<<<<<< HEAD
+    'cc_version' => '2.38.2',
 =======
-    'cc_version' => '2.38.1',
+    'cc_version' => '2.38.2',
+>>>>>>> master
+=======
+    'cc_version' => '2.38.2',
 >>>>>>> master
 
     'show_cc_version' => true,
