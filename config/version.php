@@ -12,7 +12,11 @@ return [
     |
     */
 
-    'cc_version' => '2.39.0',
+<<<<<<< HEAD
+    'cc_version' => '2.39.1',
+=======
+    'cc_version' => '2.39.1',
+>>>>>>> master
 
     'show_cc_version' => true,
 ];
