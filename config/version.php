@@ -12,19 +12,7 @@ return [
     |
     */
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     'cc_version' => '2.39.0',
-=======
-    'cc_version' => '2.39.0',
->>>>>>> master
-=======
-    'cc_version' => '2.39.0',
->>>>>>> master
-=======
-    'cc_version' => '2.39.0',
->>>>>>> master
 
     'show_cc_version' => true,
 ];
