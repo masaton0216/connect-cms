@@ -280,10 +280,12 @@ jobs:
           git checkout 2 2>/dev/null || echo "Already on branch 2"
           
           # version.phpの競合を解決
-          # 1. 競合マーカーと'cc_version'行のみを削除（show_cc_versionは保持）
-          sed -i '/^<<<<<<< /d; /^=======/d; /^>>>>>>> /d; /^[[:space:]]*'\''cc_version'\''/d' config/version.php
-          # 2. コメント終了の後に正しいcc_versionを1行だけ挿入
-          sed -i "/    \*\//a\\    'cc_version' => '${{ steps.v2_check.outputs.v2_version }}'," config/version.php
+          # 1. 競合マーカーのみを削除
+          sed -i '/^<<<<<<< /d; /^=======/d; /^>>>>>>> /d' config/version.php
+          # 2. 最初に見つかった'cc_version'行を置換（行番号を保持）
+          sed -i "0,/^[[:space:]]*'cc_version'/s/^[[:space:]]*'cc_version' => '.*',/    'cc_version' => '${{ steps.v2_check.outputs.v2_version }}',/" config/version.php
+          # 3. 重複した'cc_version'行があれば削除（最初の行は保持）
+          sed -i "0,/^[[:space:]]*'cc_version'/b; /^[[:space:]]*'cc_version'/d" config/version.php
           echo "Updated config/version.php for v2 (resolved conflicts and duplicates)"
           cat config/version.php
           
