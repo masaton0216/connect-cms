@@ -4,6 +4,24 @@ name: Test v2 Release (with Retry)
 # ワークフローが実行されるトリガー
 on:
   workflow_dispatch: # 手動実行のみ
+    inputs:
+      branch_name:
+        description: 'Test target branch'
+        required: false
+        default: '2'
+        type: choice
+        options:
+          - '2'
+          - 'master'
+      php_version:
+        description: 'PHP version for testing'
+        required: false
+        default: '8.1'
+        type: choice
+        options:
+          - '8.0'
+          - '8.1'
+          - '8.2'
 
 # 実行されるジョブを定義
 jobs:
@@ -21,14 +39,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      # 2. ブランチ「2」が存在することを確認
-      - name: Check if branch 2 exists
+      # 2. 対象ブランチが存在することを確認
+      - name: Check if target branch exists
         run: |
-          if ! git show-ref --verify --quiet refs/remotes/origin/2; then
-            echo "Error: Branch '2' does not exist. Please create v2 release first."
+          branch_name="${{ inputs.branch_name }}"
+          if ! git show-ref --verify --quiet refs/remotes/origin/$branch_name; then
+            echo "Error: Branch '$branch_name' does not exist. Please check the branch name."
             exit 1
           fi
-          echo "Branch '2' exists. Proceeding with tests."
+          echo "Branch '$branch_name' exists. Proceeding with tests."
 
       # 3. Laravel Duskテストを実行（最大10回リトライ）
       - name: Run Laravel Dusk Tests with Retry
@@ -41,18 +60,20 @@ jobs:
             echo "Laravel Dusk Test attempt $attempt of $max_attempts"
             echo "=========================================="
             
-            # Laravel Duskテストワークフローを実行（PHP 8.1指定、ブランチ2）
-            if gh workflow run "Laravel Dusk Connect-cms-test" --ref 2 -f php_version=8.1; then
+            # Laravel Duskテストワークフローを実行（指定されたブランチとPHPバージョン）
+            branch_name="${{ inputs.branch_name }}"
+            php_version="${{ inputs.php_version }}"
+            if gh workflow run "Laravel Dusk Connect-cms-test" --ref "$branch_name" -f php_version="$php_version"; then
               echo "✓ Triggered Laravel Dusk test workflow (attempt $attempt)"
-              echo "  - Branch: 2"
-              echo "  - PHP Version: 8.1"
+              echo "  - Branch: $branch_name"
+              echo "  - PHP Version: $php_version"
               
               # ワークフローの完了を待機
               echo "Waiting 30 seconds for workflow to start..."
               sleep 30
               
               # 最新の実行結果を確認
-              run_id=$(gh run list --workflow="Laravel Dusk Connect-cms-test" --branch=2 --limit=1 --json databaseId --jq '.[0].databaseId')
+              run_id=$(gh run list --workflow="Laravel Dusk Connect-cms-test" --branch="$branch_name" --limit=1 --json databaseId --jq '.[0].databaseId')
               
               if [ -z "$run_id" ] || [ "$run_id" = "null" ]; then
                 echo "❌ Failed to get workflow run ID"
@@ -75,8 +96,8 @@ jobs:
                     break
                   fi
                   
-                  echo "  Still running... waiting 30 seconds"
-                  sleep 30
+                  echo "  Still running... waiting 60 seconds"
+                  sleep 60
                 done
                 
                 # 実行結果を確認
