@@ -11,7 +11,7 @@ return [
     | from manage page, set 'show_cc_version' to false.
     |
     */
-    'cc_version' => '2.40.2',
+    'cc_version' => '2.40.3',
 
 
     'show_cc_version' => true,
