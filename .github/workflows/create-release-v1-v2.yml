@@ -306,10 +306,10 @@ jobs:
             # 競合マーカーを削除
             sed -i '/^<<<<<<< /d; /^=======/d; /^>>>>>>> /d' config/version.php
             
-            # 'cc_version' => の行のみを削除（show_cc_versionは残す）
-            sed -i "/'cc_version' =>/d" config/version.php
-            # 適切な位置にv2バージョンを挿入
-            sed -i "s|*/|*/\n\n    'cc_version' => '$v2_version',|" config/version.php
+            # 最初の'cc_version' => の行をv2バージョンに置換
+            sed -i "0,/'cc_version' =>/s/'cc_version' => '.*',/'cc_version' => '$v2_version',/" config/version.php
+            # 残りの'cc_version' => の行を削除（重複排除）
+            sed -i "0,/'cc_version' =>/b; /'cc_version' =>/d" config/version.php
             
             echo "Updated to new v2 version: $v2_version"
             git add config/version.php
