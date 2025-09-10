@@ -209,6 +209,7 @@ jobs:
     permissions:
       contents: write
       actions: write
+      pull-requests: write
 
     steps:
       # 1. リポジトリのコードをチェックアウト
