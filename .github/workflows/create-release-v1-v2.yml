@@ -305,14 +305,13 @@ jobs:
           if [ -f config/version.php ]; then
             # 競合マーカーを削除
             sed -i '/^<<<<<<< /d; /^=======/d; /^>>>>>>> /d' config/version.php
-            # ブランチ「2」の既存バージョンを確認して適切に更新
-            current_2_version=$(grep "cc_version" config/version.php | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+" | head -1)
-            if [[ "$current_2_version" =~ ^2\. && "$current_2_version" > "$v2_version" ]]; then
-              echo "Keeping existing higher v2 version: $current_2_version"
-            else
-              sed -i "s/'cc_version' => '.*',/'cc_version' => '$v2_version',/" config/version.php
-              echo "Updated to new v2 version: $v2_version"
-            fi
+            
+            # 'cc_version' => の行のみを削除（show_cc_versionは残す）
+            sed -i "/'cc_version' =>/d" config/version.php
+            # 適切な位置にv2バージョンを挿入
+            sed -i "s|*/|*/\n\n    'cc_version' => '$v2_version',|" config/version.php
+            
+            echo "Updated to new v2 version: $v2_version"
             git add config/version.php
             git commit -m "Resolve version.php conflict for v$v2_version"
           fi
